@@ -13,9 +13,12 @@ class LoginFragment : Fragment(R.layout.fragment_login){
         super.onViewCreated(view, savedInstanceState)
 
         tvRegisterNewAccount.setOnClickListener {
-            findNavController().navigate(
-                    LoginFragmentDirections.actionLoginFragmentToRegisterFragment()
-            )
+            if(findNavController().previousBackStackEntry != null){
+                findNavController().popBackStack()
+            } else
+                findNavController().navigate(
+                        LoginFragmentDirections.actionLoginFragmentToRegisterFragment()
+                )
         }
     }
 
