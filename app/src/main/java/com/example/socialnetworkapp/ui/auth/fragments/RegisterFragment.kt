@@ -42,7 +42,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
         }
     }
 
-    fun subscribeToObservers(){
+    private fun subscribeToObservers(){
         viewModel.registerStatus.observe(viewLifecycleOwner, EventObserver(
                 onError = {
                     registerProgressBar.isVisible = false
@@ -50,6 +50,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 },
                 onLoading = { registerProgressBar.isVisible = true }
         ){
+            registerProgressBar.isVisible = false
             snackbar(getString(R.string.success_registration))
         })
     }
