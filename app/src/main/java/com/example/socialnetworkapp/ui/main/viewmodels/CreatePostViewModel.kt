@@ -22,7 +22,7 @@ class CreatePostViewModel @ViewModelInject constructor(
 ) : ViewModel(){
 
     private val _createPostStatus = MutableLiveData<Event<Resource<Any>>>()
-    private val createPostStatus: LiveData<Event<Resource<Any>>> = _createPostStatus
+    val createPostStatus: LiveData<Event<Resource<Any>>> = _createPostStatus
 
     fun createPost(imageUri: Uri, text: String){
         if(text.isEmpty()) {
