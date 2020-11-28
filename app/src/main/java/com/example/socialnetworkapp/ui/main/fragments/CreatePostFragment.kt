@@ -49,7 +49,7 @@ class CreatePostFragment : Fragment(R.layout.fragment_create_post){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        cropContent = requireActivity().registerForActivityResult(cropActivityResultContract){
+        cropContent = registerForActivityResult(cropActivityResultContract){
             it?.let {
                 viewModel.setCurImageUri(it)
             }
