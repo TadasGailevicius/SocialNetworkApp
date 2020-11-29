@@ -8,7 +8,7 @@ data class Post (
    val id: String = "",
    val authorUid: String = "",
    @get:Exclude var authorUsername: String = "",
-   @get:Exclude var authorProfilePictureUr: String = "",
+   @get:Exclude var authorProfilePictureUrl: String = "",
    val text: String = "",
    val imageUrl: String = "",
    val date: Long = 0L,
