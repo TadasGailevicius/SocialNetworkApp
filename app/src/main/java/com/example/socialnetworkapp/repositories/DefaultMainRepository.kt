@@ -63,6 +63,14 @@ class DefaultMainRepository : MainRepository {
         }
     }
 
+    override suspend fun searchUser(query: String): Resource<List<User>> = withContext(Dispatchers.IO){
+        safeCall {
+            val userResults = users.whereGreaterThanOrEqualTo("username", query.toUpperCase(Locale.ROOT))
+                    .get().await().toObjects(User::class.java)
+            Resource.Success(userResults)
+        }
+    }
+
     override suspend fun toggleFollowForUser(uid: String) = withContext(Dispatchers.IO){
         safeCall {
             var isFollowing = false
