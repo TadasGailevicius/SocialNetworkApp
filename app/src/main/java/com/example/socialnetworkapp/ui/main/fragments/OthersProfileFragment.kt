@@ -26,6 +26,7 @@ class OthersProfileFragment : ProfileFragment() {
     private var curUser: User? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         subscribeToObservers()
 
         btnToggleFollow.setOnClickListener {
