@@ -5,7 +5,9 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.RequestManager
+import com.example.socialnetworkapp.R
 import com.example.socialnetworkapp.adapters.PostAdapter
 import com.example.socialnetworkapp.adapters.UserAdapter
 import com.example.socialnetworkapp.other.EventObserver
@@ -52,6 +54,15 @@ abstract class BasePostFragment(
 
         postAdapter.setOnLikedByClickListener { post ->
             basePostViewModel.getUsers(post.likedBy)
+        }
+
+        postAdapter.setOnCommentClickLitener { comment ->
+            findNavController().navigate(
+                    R.id.globalActionToCommentDialog,
+                    Bundle().apply {
+                        putString("postId", comment.id)
+                    }
+            )
         }
     }
 
