@@ -25,13 +25,13 @@ class SettingsViewModel @ViewModelInject constructor(
 ) : ViewModel() {
     
     private val _updateProfileStatus = MutableLiveData<Event<Resource<Any>>>()
-    private val updateProfileStatus: LiveData<Event<Resource<Any>>> = _updateProfileStatus
+    val updateProfileStatus: LiveData<Event<Resource<Any>>> = _updateProfileStatus
 
     private val _getUserStatus = MutableLiveData<Event<Resource<User>>>()
-    private val getUserStatus: LiveData<Event<Resource<User>>> = _getUserStatus
+    val getUserStatus: LiveData<Event<Resource<User>>> = _getUserStatus
 
     private val _curImageUri = MutableLiveData<Uri>()
-    private val curImageUri: LiveData<Uri> = _curImageUri
+    val curImageUri: LiveData<Uri> = _curImageUri
 
     fun updateProfile(profileUpdate: ProfileUpdate){
         if(profileUpdate.username.isEmpty() || profileUpdate.description.isEmpty()){
