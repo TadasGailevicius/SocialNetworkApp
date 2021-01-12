@@ -10,4 +10,6 @@ object Constants {
 
     const val SEARCH_TIME_DELAY = 500L
 
+    const val PAGE_SIZE = 5
+
 }

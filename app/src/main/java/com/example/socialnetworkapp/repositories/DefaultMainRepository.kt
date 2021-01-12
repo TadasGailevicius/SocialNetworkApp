@@ -1,8 +1,11 @@
 package com.example.socialnetworkapp.repositories
 
 import android.net.Uri
+import com.example.socialnetworkapp.data.entities.Comment
 import com.example.socialnetworkapp.data.entities.Post
+import com.example.socialnetworkapp.data.entities.ProfileUpdate
 import com.example.socialnetworkapp.data.entities.User
+import com.example.socialnetworkapp.other.Constants.DEFAULT_PROFILE_PICTURE_URL
 import com.example.socialnetworkapp.other.Resource
 import com.example.socialnetworkapp.other.safeCall
 import com.google.firebase.auth.FirebaseAuth
@@ -124,6 +127,77 @@ class DefaultMainRepository : MainRepository {
         }
     }
 
+    override suspend fun createComment(commentText: String, postId: String) = withContext(Dispatchers.IO){
+        safeCall {
+            val uid = auth.uid!!
+            val commentId = UUID.randomUUID().toString()
+            val user = getUser(uid).data!!
+            val comment = Comment(
+                    commentId,
+                    postId,
+                    uid,
+                    user.username,
+                    user.profilePictureUrl,
+                    commentText
+            )
+            comments.document(commentId).set(comment).await()
+            Resource.Success(comment)
+        }
+    }
+
+    override suspend fun updateProfilePicture(uid: String, imageUri: Uri) = withContext(Dispatchers.IO){
+            val storageRef = storage.getReference(uid)
+            val user = getUser(uid).data!!
+            if(user.profilePictureUrl != DEFAULT_PROFILE_PICTURE_URL){
+                storage.getReferenceFromUrl(user.profilePictureUrl).delete().await()
+            }
+            storageRef.putFile(imageUri).await().metadata?.reference?.downloadUrl?.await()
+    }
+
+    override suspend fun updateProfile(profileUpdate: ProfileUpdate) = withContext(Dispatchers.IO){
+        safeCall {
+            val imageUrl = profileUpdate.profilePictureUri?.let { uri ->
+                updateProfilePicture(profileUpdate.uidToUpdate, uri).toString()
+            }
+
+            val map = mutableMapOf(
+                    "username" to profileUpdate.username,
+                    "description" to profileUpdate.description
+            )
+            imageUrl?.let { url ->
+                map["profilePictureUrl"] = url
+            }
+
+            users.document(profileUpdate.uidToUpdate).update(map.toMap()).await()
+            Resource.Success(Any())
+        }
+    }
+
+    override suspend fun deleteComment(comment: Comment) = withContext(Dispatchers.IO){
+        safeCall {
+            comments.document(comment.commentId).delete().await()
+            Resource.Success(comment)
+        }
+    }
+
+    override suspend fun getCommentForPost(postId: String) = withContext(Dispatchers.IO){
+        safeCall {
+            val commentsForPost = comments
+                    .whereEqualTo("postId",postId)
+                    .orderBy("date", Query.Direction.DESCENDING)
+                    .get()
+                    .await()
+                    .toObjects(Comment::class.java)
+                    .onEach { comment ->
+                        val user = getUser(comment.uid).data!!
+                        comment.username = user.username
+                        comment.profilePictureUrl = user.profilePictureUrl
+                    }
+
+            Resource.Success(commentsForPost)
+        }
+    }
+
     override suspend fun deletePost(post: Post) = withContext(Dispatchers.IO){
         safeCall {
             posts.document(post.id).delete().await()
@@ -134,9 +208,14 @@ class DefaultMainRepository : MainRepository {
 
     override suspend fun getUsers(uids: List<String>) = withContext(Dispatchers.IO){
         safeCall {
-            val usersList = users.whereIn("uid",uids).orderBy("username").get().await()
-                    .toObjects(User::class.java)
-            Resource.Success(usersList)
+            val chunks = uids.chunked(10)
+            val resultList = mutableListOf<User>()
+            chunks.forEach{ chunk ->
+                val usersList = users.whereIn("uid",uids).orderBy("username").get().await()
+                        .toObjects(User::class.java)
+                resultList.addAll(usersList)
+            }
+            Resource.Success(resultList.toList())
         }
     }
 
